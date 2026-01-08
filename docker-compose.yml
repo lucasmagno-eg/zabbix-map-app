@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - ZABBIX_API_URL=${ZABBIX_API_URL}
+      - ZABBIX_USER=${ZABBIX_USER}
+      - ZABBIX_PASSWORD=${ZABBIX_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGIN=${FRONTEND_URL}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - zabbix-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - zabbix-network
+
+networks:
+  zabbix-network:
+    driver: bridge
